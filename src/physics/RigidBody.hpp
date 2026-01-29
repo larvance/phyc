@@ -136,9 +136,9 @@ namespace PhyC {
 
         struct CollisionManifold {
             RigidBody* otherBody;
-            vec3 normal;       // Points from Other -> This
-            vec3 contactPoint; // World space position of impact
-            double depth;      // Penetration depth
+            vec3 normal;
+            vec3 contactPoint;
+            double depth;
         };
 
         std::vector<CollisionManifold> collisionCache{};

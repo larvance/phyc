@@ -56,15 +56,10 @@ int main() {
 
     PhysicsGUI gui{world, scene, window, init};
 
-    std::mutex over;
-    bool isOver = false;
+    std::atomic isOver = false;
 
-    std::thread physicsThread([&world, &over, &isOver]() {
-        while (true) {
-            {
-                std::lock_guard lock(over);
-                if (isOver) break;
-            }
+    std::thread physicsThread([&world, &isOver]() {
+        while (!isOver) {
             world.update();
             std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
@@ -77,10 +72,7 @@ int main() {
         window.swapBuffers();
     }
 
-    {
-        std::lock_guard lock(over);
-        isOver = true;
-    }
+    isOver = true;
 
     physicsThread.join();
 
