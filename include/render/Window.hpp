@@ -5,7 +5,7 @@
 
 namespace PhyCRenderer {
     struct Window {
-        GLFWwindow* window;
+        GLFWwindow* handle;
         int width, height;
         void* userPointer = nullptr;
 
@@ -22,13 +22,13 @@ namespace PhyCRenderer {
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-            window = glfwCreateWindow(width, height, "PhyC Physics Renderer", nullptr, nullptr);
-            if (!window) {
+            handle = glfwCreateWindow(width, height, "PhyC Physics Renderer", nullptr, nullptr);
+            if (!handle) {
                 glfwTerminate();
                 std::cerr << "Failed to create window" << std::endl;
                 throw std::runtime_error("Failed to create window");
             }
-            glfwMakeContextCurrent(window);
+            glfwMakeContextCurrent(handle);
             glfwSwapInterval(1);
 
             if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -38,48 +38,52 @@ namespace PhyCRenderer {
 
             glEnable(GL_DEPTH_TEST);
 
-            glfwSetWindowUserPointer(window, this);
+            glfwSetWindowUserPointer(handle, this);
+        }
+
+        double aspectRatio() const {
+            return static_cast<double>(width) / static_cast<double>(height);
         }
 
         bool isCursorNormal() const {
-            return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
+            return glfwGetInputMode(handle, GLFW_CURSOR) == GLFW_CURSOR_NORMAL;
         }
 
         bool isCursorDisabled() const {
-            return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+            return glfwGetInputMode(handle, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
         }
 
         bool isCursorHidden() const {
-            return glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN;
+            return glfwGetInputMode(handle, GLFW_CURSOR) == GLFW_CURSOR_HIDDEN;
         }
 
         void showCursor() const {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         }
 
         void hideCursor() const {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
         }
 
         void disableCursor() const {
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(handle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         }
 
         bool shouldClose() const {
-            return glfwWindowShouldClose(window);
+            return glfwWindowShouldClose(handle);
         }
 
         void poll() {
             glfwPollEvents();
-            glfwGetFramebufferSize(window, &width, &height);
+            glfwGetFramebufferSize(handle, &width, &height);
         }
 
         void swapBuffers() const {
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(handle);
         }
 
         ~Window() {
-            glfwDestroyWindow(window);
+            glfwDestroyWindow(handle);
             glfwTerminate();
         }
 

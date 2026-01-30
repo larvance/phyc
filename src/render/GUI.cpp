@@ -1,4 +1,4 @@
-#include "GUI.hpp"
+#include "render/GUI.hpp"
 
 #include <filesystem>
 #include <imgui_impl_glfw.h>
@@ -27,7 +27,7 @@ PhysicsGUI::PhysicsGUI(
         io->Fonts->AddFontDefault(&config);
     }
 
-    ImGui_ImplGlfw_InitForOpenGL(window.window, true);
+    ImGui_ImplGlfw_InitForOpenGL(window.handle, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
     if (initFunc) initFunc(world);

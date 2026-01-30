@@ -1,4 +1,4 @@
-#include "Light.hpp"
+#include "render/light/Light.hpp"
 
 using namespace PhyCRenderer;
 

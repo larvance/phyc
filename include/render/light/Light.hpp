@@ -2,8 +2,8 @@
 #include <imgui.h>
 #include <string>
 #include <glm/vec3.hpp>
-#include "../../physics/RigidBody.hpp"
-#include "../Shader.hpp"
+#include "physics/RigidBody.hpp"
+#include "render/Shader.hpp"
 
 namespace PhyCRenderer {
     enum class LightType { Directional, Spot, Hemisphere, Point, Ambient };

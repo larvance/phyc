@@ -1,5 +1,11 @@
-#include "RigidBody.hpp"
-#include "World.hpp"
+#include "physics/RigidBody.hpp"
+#include "physics/World.hpp"
+#include "physics/joints/FixedJoint.hpp"
+#include "physics/joints/PlanarJoint.hpp"
+#include "physics/joints/PrismaticJoint.hpp"
+#include "physics/joints/RevoluteJoint.hpp"
+#include "physics/joints/SphericalJoint.hpp"
+#include "physics/joints/UniversalJoint.hpp"
 
 using namespace PhyC;
 
@@ -15,7 +21,7 @@ void RigidBody::precomputeMass() {
     pStableCenterOfMass.setZero();
     pMass = 0.0;
 
-    for (const auto& s : surface) {
+    for (const auto& s : surface.elements) {
         double m = s.mass();
         pStableCenterOfMass += m * s.offset;
         pMass += m;
@@ -39,7 +45,7 @@ void RigidBody::precomputeMass() {
 void RigidBody::precomputeInertia() {
     mat3 I = mat3::Zero();
 
-    for (const auto& s : surface) {
+    for (const auto& s : surface.elements) {
         double m = s.mass();
 
         vec3 v0 = (s.offset + s.corners.col(0)) - pStableCenterOfMass;
@@ -113,7 +119,7 @@ void RigidBody::evaluateRK4(Derivative& out, const State& initial, const Derivat
     state.rot.coeffs() += d.dRot.coeffs() * dt;
     state.rot.normalize();
 
-    computeForcesAt(state, dt);
+    computeForcesAt(state);
 
     out.dPos = state.vel;
     out.dVel = state.force() * pInvMass;
@@ -134,6 +140,8 @@ void RigidBody::integrateRK4(double dt) {
     State initial{curState};
 
     Derivative a, b, c, d;
+
+    auto t = id;
 
     // 4 k values:
     evaluateRK4(a, initial, Derivative(), 0.0f);
@@ -159,7 +167,7 @@ void RigidBody::integrateRK4(double dt) {
 
 void RigidBody::integrateEuler(double dt) {
     FTState state{curState};
-    computeForcesAt(state, dt);
+    computeForcesAt(state);
 
     vec3 acc = state.force() * pInvMass;
     curState.pos += (curState.vel + 0.5 * dt * acc) * dt;
@@ -190,13 +198,13 @@ void RigidBody::update(double dt) {
     alignCollidingBodies();
 }
 
-void RigidBody::computeForcesAt(FTState& state, double dt) const {
+void RigidBody::computeForcesAt(FTState& state) const {
     computeGravityForce(state);
 
-    // AirProperties air = world->sampleAirProperties(state.pos);
-
+    // FluidProperties air = world->sampleAirProperties(state.pos);
+    //
     // computeAeroSurfaceForces(state, air);
-
+    //
     // computeAeroDampingTorque(state, air);
 }
 
@@ -204,6 +212,21 @@ void RigidBody::computeGravityForce(FTState& state) const {
     state.applyForce(pMass * world->gravity);
 }
 
+template <typename JointType>
+JointType& RigidBody::createJoint(RigidBody& target) {
+    JointType& joint = world->createJoint<JointType>();
+    joint.parent = this;
+    joint.child = &target;
+    return joint;
+}
+
 void RigidBody::remove() {
     if (world) world->removeRigidBody(*this);
 }
+
+template FixedJoint& RigidBody::createJoint<FixedJoint>(RigidBody&);
+template PlanarJoint& RigidBody::createJoint<PlanarJoint>(RigidBody&);
+template PrismaticJoint& RigidBody::createJoint<PrismaticJoint>(RigidBody&);
+template RevoluteJoint& RigidBody::createJoint<RevoluteJoint>(RigidBody&);
+template SphericalJoint& RigidBody::createJoint<SphericalJoint>(RigidBody&);
+template UniversalJoint& RigidBody::createJoint<UniversalJoint>(RigidBody&);

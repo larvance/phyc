@@ -1,5 +1,5 @@
 #pragma once
-#include "../phyc.hpp"
+#include "phyc.hpp"
 
 namespace PhyC {
     struct RigidBodyMass {

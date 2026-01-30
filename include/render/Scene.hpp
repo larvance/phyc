@@ -2,11 +2,11 @@
 #include <glad/glad.h>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../physics/World.hpp"
+#include "physics/World.hpp"
 #include "Camera.hpp"
 #include "controller/Controller.hpp"
 #include "Shader.hpp"
-#include "Window.hpp"
+#include "render/Window.hpp"
 #include "light/Light.hpp"
 
 namespace PhyCRenderer {

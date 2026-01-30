@@ -1,8 +1,8 @@
 #pragma once
-#include "../phyc.hpp"
+#include "phyc.hpp"
 
 namespace PhyC {
-    struct AirProperties {
+    struct FluidProperties {
         vec3 vel;
         double density;
         double pressure;

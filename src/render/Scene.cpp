@@ -1,6 +1,6 @@
-#include "Scene.hpp"
-
-#include "ShaderStrings.hpp"
+#include "render/Scene.hpp"
+#include "render/ShaderStrings.hpp"
+#include "phyc.hpp"
 
 using namespace PhyCRenderer;
 
@@ -27,7 +27,7 @@ Scene::Scene(Window& window) : window(window) {
 
     window.userPointer = this;
 
-    glfwSetKeyCallback(window.window, [](GLFWwindow* _, int key, int scancode, int action, int mods) {
+    glfwSetKeyCallback(window.handle, [](GLFWwindow* _, int key, int scancode, int action, int mods) {
         auto& scene = from(_);
 
         if (key >= 0 && key < GLFW_KEY_LAST) {
@@ -48,14 +48,14 @@ Scene::Scene(Window& window) : window(window) {
             }
         }
     });
-    glfwSetFramebufferSizeCallback(window.window, [](GLFWwindow* _, int width, int height) {
+    glfwSetFramebufferSizeCallback(window.handle, [](GLFWwindow* _, int width, int height) {
         auto& scene = from(_);
 
         for (auto& controller : scene.controllers) {
             controller->onResize(scene);
         }
     });
-    glfwSetCursorPosCallback(window.window, [](GLFWwindow* _, double x, double y) {
+    glfwSetCursorPosCallback(window.handle, [](GLFWwindow* _, double x, double y) {
         auto& scene = from(_);
         x -= scene.viewport[0];
         y -= scene.viewport[1];
@@ -78,7 +78,7 @@ Scene::Scene(Window& window) : window(window) {
             controller->onMouseMove(scene);
         }
     });
-    glfwSetMouseButtonCallback(window.window, [](GLFWwindow* _, int button, int action, int mods) {
+    glfwSetMouseButtonCallback(window.handle, [](GLFWwindow* _, int button, int action, int mods) {
         auto& scene = from(_);
 
         bool new_val = ((action != GLFW_RELEASE));
@@ -107,14 +107,14 @@ Scene::Scene(Window& window) : window(window) {
             }
         }
     });
-    glfwSetScrollCallback(window.window, [](GLFWwindow* _, double dx, double dy) {
+    glfwSetScrollCallback(window.handle, [](GLFWwindow* _, double dx, double dy) {
         auto& scene = from(_);
 
         for (auto& controller : scene.controllers) {
             controller->onScroll(scene, dx, dy);
         }
     });
-    glfwSetWindowFocusCallback(window.window, [](GLFWwindow* _, int focused) {
+    glfwSetWindowFocusCallback(window.handle, [](GLFWwindow* _, int focused) {
         auto& scene = from(_);
 
         scene.focused = (focused == GLFW_TRUE);
@@ -223,7 +223,7 @@ void Scene::render(const World& world) {
         normalMatrix.set(glm::transpose(glm::inverse(glm::mat3(modelVal))));
 
         vertexBuffer.clear();
-        for (const auto& surface : body.surface) {
+        for (const auto& surface : body.surface.elements) {
             glm::vec3 normal = toGlm(surface.normal);
             glm::mat3 corners = toGlm(surface.corners);
 

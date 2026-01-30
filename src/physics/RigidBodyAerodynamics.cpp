@@ -1,5 +1,5 @@
-#include "RigidBody.hpp"
-#include "World.hpp"
+#include "physics/RigidBody.hpp"
+#include "physics/World.hpp"
 
 using namespace PhyC;
 
@@ -11,7 +11,7 @@ using namespace PhyC;
 // no Reynolds dependence
 // no Mach effects
 // flat plate behavior everywhere
-double RigidBody::solveLocalPressure(const vec3& normal, const vec3& relativeVelocity, const AirProperties& air) {
+double RigidBody::solveLocalPressure(const vec3& normal, const vec3& relativeVelocity, const FluidProperties& air) {
     double v_n = relativeVelocity.dot(normal);
 
     return 0.5 * air.density * v_n * abs(v_n); // dynamic pressure
@@ -20,7 +20,7 @@ double RigidBody::solveLocalPressure(const vec3& normal, const vec3& relativeVel
 // approximation
 // not reynolds-dependent
 // not laminar <-> turbulent aware
-vec3 RigidBody::solveLocalShearStress(const vec3& normal, const vec3& relativeVelocity, const AirProperties& air) {
+vec3 RigidBody::solveLocalShearStress(const vec3& normal, const vec3& relativeVelocity, const FluidProperties& air) {
     vec3 v_t = relativeVelocity - relativeVelocity.dot(normal) * normal;
 
     double speed_t = v_t.norm();
@@ -34,10 +34,10 @@ vec3 RigidBody::solveLocalShearStress(const vec3& normal, const vec3& relativeVe
     return shear;
 }
 
-void RigidBody::computeAeroSurfaceForces(FTState& state, const AirProperties& air) const {
+void RigidBody::computeAeroSurfaceForces(FTState& state, const FluidProperties& air) const {
     mat3 R = state.rot.toRotationMatrix();
 
-    for (const auto& elem : surface) {
+    for (const auto& elem : surface.elements) {
         vec3 r_body = elem.offset - pStableCenterOfMass;
         vec3 r = R * r_body;
 
@@ -64,7 +64,7 @@ void RigidBody::computeAeroSurfaceForces(FTState& state, const AirProperties& ai
 }
 
 // not exact, but efficient and accurate
-void RigidBody::computeAeroDampingTorque(FTState& state, const AirProperties& air) const {
+void RigidBody::computeAeroDampingTorque(FTState& state, const FluidProperties& air) const {
     vec3 omega_body = state.rot.inverse() * state.angVel;
 
     double rho = air.density;
